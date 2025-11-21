@@ -1,0 +1,216 @@
+# RapidYencSharp
+
+.NET bindings for [rapidyenc](https://github.com/animetosho/rapidyenc) - a high-performance yEnc encoding/decoding library.
+
+## Features
+
+- High-performance yEnc encoding and decoding
+- CRC32 computation with combine operations
+- Zero-allocation API using `Span<T>` and `ArrayPool<T>`
+- Incremental encoding/decoding with state tracking
+- NNTP dot unstuffing support
+- Automatic SIMD optimization (SSE2, SSSE3, AVX, AVX2, VBMI2, NEON, RVV)
+- Cross-platform support (Windows x64, Linux x64/ARM64)
+
+## Installation
+
+```bash
+dotnet add package RapidYencSharp
+```
+
+## Requirements
+
+- .NET 9.0 or later
+- Native rapidyenc library (included in the package for supported platforms)
+
+## Quick Start
+
+### Basic Encoding and Decoding
+
+```csharp
+using RapidYencSharp;
+
+// Encode data
+byte[] original = Encoding.UTF8.GetBytes("Hello, World!");
+byte[] encoded = YencEncoder.Encode(original);
+
+// Decode data
+byte[] decoded = YencDecoder.Decode(encoded);
+```
+
+### Zero-Allocation Encoding with Span
+
+```csharp
+ReadOnlySpan<byte> data = "Hello, World!"u8;
+
+// Calculate maximum encoded size
+nuint maxSize = YencEncoder.GetMaxEncodedLength((nuint)data.Length);
+
+// Use stackalloc for small data
+Span<byte> encodedBuffer = stackalloc byte[(int)maxSize];
+int bytesWritten = YencEncoder.Encode(data, encodedBuffer);
+
+// Decode back
+Span<byte> decodedBuffer = stackalloc byte[data.Length];
+int decodedBytes = YencDecoder.Decode(encodedBuffer[..bytesWritten], decodedBuffer);
+```
+
+### High-Performance Encoding with ArrayPool
+
+```csharp
+using System.Buffers;
+
+byte[] largeData = new byte[10_000];
+nuint maxSize = YencEncoder.GetMaxEncodedLength((nuint)largeData.Length);
+
+byte[] encodedBuffer = ArrayPool<byte>.Shared.Rent((int)maxSize);
+try
+{
+    int bytesWritten = YencEncoder.Encode(largeData, encodedBuffer);
+    // Use encoded data...
+}
+finally
+{
+    ArrayPool<byte>.Shared.Return(encodedBuffer);
+}
+```
+
+### Incremental Encoding
+
+```csharp
+int? column = 0;
+byte[] chunk1 = Encoding.UTF8.GetBytes("First chunk");
+byte[] chunk2 = Encoding.UTF8.GetBytes("Second chunk");
+
+// Encode first chunk
+byte[] encoded1 = YencEncoder.EncodeEx(chunk1, ref column, lineSize: 128, isEnd: false);
+
+// Encode final chunk
+byte[] encoded2 = YencEncoder.EncodeEx(chunk2, ref column, lineSize: 128, isEnd: true);
+```
+
+### CRC32 Computation
+
+```csharp
+byte[] data = Encoding.UTF8.GetBytes("Hello, World!");
+uint crc = Crc32.Compute(data);
+Console.WriteLine($"CRC32: 0x{crc:X8}");
+
+// Combine CRC32 values
+byte[] part1 = Encoding.UTF8.GetBytes("Hello, ");
+byte[] part2 = Encoding.UTF8.GetBytes("World!");
+uint crc1 = Crc32.Compute(part1);
+uint crc2 = Crc32.Compute(part2);
+uint combined = Crc32.Combine(crc1, crc2, (ulong)part2.Length);
+```
+
+## API Reference
+
+### YencEncoder
+
+#### Methods
+
+- `byte[] Encode(ReadOnlySpan<byte> input)` - Encodes data and returns a new array
+- `int Encode(ReadOnlySpan<byte> input, Span<byte> output, int lineSize = 128)` - Encodes data into provided buffer
+- `byte[] EncodeEx(ReadOnlySpan<byte> input, ref int? column, int lineSize = 128, bool isEnd = true)` - Incremental encoding with column tracking
+- `int EncodeEx(ReadOnlySpan<byte> input, Span<byte> output, ref int? column, int lineSize = 128, bool isEnd = true)` - Incremental encoding into buffer
+- `nuint GetMaxEncodedLength(nuint inputLength, int lineSize = 128)` - Calculates maximum encoded output size
+
+#### Properties
+
+- `int Kernel` - Gets the SIMD instruction set used for encoding
+
+### YencDecoder
+
+#### Methods
+
+- `byte[] Decode(ReadOnlySpan<byte> input)` - Decodes data and returns a new array
+- `int Decode(ReadOnlySpan<byte> input, Span<byte> output)` - Decodes data into provided buffer
+- `byte[] DecodeEx(ReadOnlySpan<byte> input, ref RapidYencDecoderState? state, bool isRaw = true)` - Decodes with NNTP dot unstuffing
+- `int DecodeEx(ReadOnlySpan<byte> input, Span<byte> output, ref RapidYencDecoderState? state, bool isRaw = true)` - Decodes into buffer with state tracking
+- `(byte[] DecodedData, RapidYencDecoderEnd EndState) DecodeIncremental(ReadOnlySpan<byte> input, ref RapidYencDecoderState state)` - Incremental decoding
+- `int DecodeIncremental(ReadOnlySpan<byte> input, Span<byte> output, ref RapidYencDecoderState state, out RapidYencDecoderEnd endState)` - Incremental decoding into buffer
+
+#### Properties
+
+- `int Kernel` - Gets the SIMD instruction set used for decoding
+
+### Crc32
+
+#### Methods
+
+- `uint Compute(ReadOnlySpan<byte> data, uint initCrc = 0)` - Computes CRC32 checksum
+- `uint Combine(uint crc1, uint crc2, ulong length2)` - Combines two CRC32 values
+- `uint Zeros(uint initCrc, ulong length)` - CRC32 of zero bytes
+- `uint Unzero(uint initCrc, ulong length)` - Reverse operation of Zeros
+- `uint Multiply(uint a, uint b)` - Multiplies two CRC32 polynomials
+- `uint Pow2(long n)` - Computes 2^n in CRC32 polynomial field
+- `uint Pow256(ulong n)` - Computes 256^n in CRC32 polynomial field
+
+#### Properties
+
+- `int Kernel` - Gets the SIMD instruction set used for CRC32
+
+### Version
+
+#### Properties
+
+- `int Major` - Major version number
+- `int Minor` - Minor version number
+- `int Patch` - Patch version number
+
+#### Methods
+
+- `int GetVersion()` - Returns version as integer (0xMMNNPP format)
+
+## Performance
+
+RapidYencSharp leverages the native rapidyenc library which automatically selects the best SIMD instruction set available on your CPU:
+
+- **x86/x64**: Generic, SSE2, SSSE3, AVX, AVX2, VBMI2
+- **ARM**: NEON, ARM CRC32, ARM PMULL
+- **RISC-V**: RVV
+
+Check which instruction set is being used:
+
+```csharp
+Console.WriteLine($"Encode kernel: 0x{YencEncoder.Kernel:X}");
+Console.WriteLine($"Decode kernel: 0x{YencDecoder.Kernel:X}");
+Console.WriteLine($"CRC32 kernel: 0x{Crc32.Kernel:X}");
+```
+
+## Examples
+
+The `Examples.cs` file contains comprehensive examples including:
+
+- Basic encoding/decoding
+- Incremental encoding with column tracking
+- CRC32 computation and combining
+- Zero-allocation encoding using stackalloc
+- High-performance encoding with ArrayPool
+- Streaming data processing
+
+## Native Library
+
+The package includes precompiled native libraries for:
+
+- Windows x64 (`rapidyenc.dll`)
+- Linux x64 (`librapidyenc.so`)
+- Linux ARM64 (`librapidyenc.so`)
+
+For other platforms, you'll need to build the rapidyenc library from source and place it in the application directory.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+The underlying rapidyenc library is licensed under its own terms. See the [rapidyenc repository](https://github.com/animetosho/rapidyenc) for details.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit issues or pull requests.
+
+## Acknowledgments
+
+- [rapidyenc](https://github.com/animetosho/rapidyenc) by Anime Tosho for the high-performance native library
+- All contributors to this project

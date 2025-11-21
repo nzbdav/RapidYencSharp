@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <Authors>RapidYencSharp Contributors</Authors>
+        <Description>.NET bindings for rapidyenc - a high-performance yEnc encoding/decoding library</Description>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
+        <RepositoryUrl>https://github.com/nzbdav-dev/RapidYencSharp</RepositoryUrl>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <!-- Include README in NuGet package -->
+        <None Include="../README.md" Pack="true" PackagePath="\" />
+        <!-- Include LICENSE in NuGet package -->
+        <None Include="../LICENSE" Pack="true" PackagePath="\" />
+        <!-- Copy native library to output directory if it exists -->
+        <None Include="runtimes/**/*" Pack="true" PackagePath="runtimes/%(RecursiveDir)%(Filename)%(Extension)" />
+        <None Include="runtimes/**/*" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+
+</Project>
