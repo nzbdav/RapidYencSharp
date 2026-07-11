@@ -1,7 +1,13 @@
 {
   "version": 1,
   "dependencies": {
-    "net9.0": {
+    "net10.0": {
+      "Microsoft.NET.ILLink.Tasks": {
+        "type": "Direct",
+        "requested": "[10.0.9, )",
+        "resolved": "10.0.9",
+        "contentHash": "/zs/o28l6Hq8G9XgEfeYC8VkiSfv98zpNdWnZu4Y3pwoStzI0MNRO8xjFuSF6aI/fMdKf3+sVDRZGlxyBc88jA=="
+      },
       "Microsoft.SourceLink.GitHub": {
         "type": "Direct",
         "requested": "[10.0.300, )",
@@ -31,6 +37,7 @@
         "resolved": "10.0.8",
         "contentHash": "+dJsbPJ3FyUbTZNplFj0RCKePFizmv6ewDV46JE9q/IVH4c3xTCftHfHelLsAKf0jryIPqgMb5GpS0x7TAY3mg=="
       }
-    }
+    },
+    "net10.0/osx-arm64": {}
   }
 }

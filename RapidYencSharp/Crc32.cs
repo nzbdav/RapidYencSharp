@@ -7,31 +7,32 @@ namespace RapidYencSharp;
 /// </summary>
 public static class Crc32
 {
-    private static bool _initialized = false;
-    private static readonly object _initLock = new object();
+    private static readonly Lazy<bool> Init = new(() =>
+    {
+        NativeMethods.EnsureResolverRegistered();
+        NativeMethods.rapidyenc_crc_init();
+        return true;
+    });
 
     /// <summary>
     /// Ensures the CRC32 module is initialized. This method is thread-safe and idempotent.
     /// </summary>
     public static void EnsureInitialized()
     {
-        if (!_initialized)
-        {
-            lock (_initLock)
-            {
-                if (!_initialized)
-                {
-                    NativeMethods.rapidyenc_crc_init();
-                    _initialized = true;
-                }
-            }
-        }
+        _ = Init.Value;
     }
 
     /// <summary>
     /// Gets the kernel/ISA level used for CRC32 computation
     /// </summary>
-    public static int Kernel => NativeMethods.rapidyenc_crc_kernel();
+    public static int Kernel
+    {
+        get
+        {
+            EnsureInitialized();
+            return NativeMethods.rapidyenc_crc_kernel();
+        }
+    }
 
     /// <summary>
     /// Computes the CRC32 hash of the input data

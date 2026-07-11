@@ -5,7 +5,7 @@
         <TreatWarningsAsErrors Condition="'$(CI)' == 'true' and '$(MSBuildProjectName)' == 'RapidYencSharp'">true</TreatWarningsAsErrors>
         <EnableNETAnalyzers>true</EnableNETAnalyzers>
         <AnalysisLevel>latest</AnalysisLevel>
-        <LangVersion>13</LangVersion>
+        <LangVersion>14</LangVersion>
 
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
         <RestoreLockedMode Condition="'$(CI)' == 'true'">true</RestoreLockedMode>

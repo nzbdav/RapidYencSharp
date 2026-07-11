@@ -10,6 +10,7 @@ public static class YencDecoder
 {
     private static readonly Lazy<bool> Init = new(() =>
     {
+        NativeMethods.EnsureResolverRegistered();
         NativeMethods.rapidyenc_decode_init();
         return true;
     });
@@ -25,7 +26,14 @@ public static class YencDecoder
     /// <summary>
     /// Gets the kernel/ISA level used for decoding
     /// </summary>
-    public static int Kernel => NativeMethods.rapidyenc_decode_kernel();
+    public static int Kernel
+    {
+        get
+        {
+            EnsureInitialized();
+            return NativeMethods.rapidyenc_decode_kernel();
+        }
+    }
 
     /// <summary>
     /// Decodes yEnc encoded data directly into the provided output buffer
@@ -133,7 +141,7 @@ public static class YencDecoder
                 }
                 else
                 {
-                    decodedLength = NativeMethods.rapidyenc_decode_ex(
+                    decodedLength = NativeMethods.rapidyenc_decode_ex_without_state(
                         isRaw ? 1 : 0,
                         new IntPtr(inputPtr),
                         new IntPtr(outputPtr),

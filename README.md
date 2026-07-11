@@ -4,7 +4,7 @@
 [![NuGet](https://img.shields.io/nuget/v/RapidYencSharp.svg)](https://www.nuget.org/packages/RapidYencSharp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-.NET bindings for [rapidyenc](https://github.com/animetosho/rapidyenc) - a high-performance yEnc encoding/decoding library.
+.NET bindings for [rapidyenc](https://github.com/nzbdav/rapidyenc) - a high-performance yEnc encoding/decoding library.
 
 Maintained by the [nzbdav organization](https://github.com/nzbdav).
 
@@ -26,7 +26,7 @@ dotnet add package RapidYencSharp
 
 ## Requirements
 
-- .NET 9.0 or later
+- .NET 10.0 or later
 - Native rapidyenc library (included in the package for supported platforms)
 
 ## Supported Platforms
@@ -189,6 +189,11 @@ RapidYencSharp leverages the native rapidyenc library which automatically select
 - **ARM**: NEON, ARM CRC32, ARM PMULL
 - **RISC-V**: RVV
 
+The managed boundary uses source-generated interop and span-based APIs. C# 14's
+first-class span conversions let arrays flow into these APIs without duplicate
+array overloads, while the native library remains responsible for SIMD-heavy
+encoding, decoding, and CRC work.
+
 Check which instruction set is being used:
 
 ```csharp
@@ -213,9 +218,20 @@ The `Examples.cs` file contains comprehensive examples including:
 The package includes the native libraries listed under
 [Supported Platforms](#supported-platforms). For other platforms, build
 rapidyenc from source and place the resulting shared library in the application
-directory.
+directory. Custom deployments and local native builds can set
+`RAPIDYENC_LIBRARY_PATH` to an absolute shared-library path.
 
 ## Building from Source
+
+Clone the repository with its rapidyenc submodule:
+
+```bash
+git clone --recurse-submodules https://github.com/nzbdav/RapidYencSharp.git
+cd RapidYencSharp
+```
+
+For an existing clone, initialize the submodule with
+`git submodule update --init`.
 
 The reproducible build uses the repository `Dockerfile` to compile every
 supported native runtime and pack the NuGet package. With Podman installed:
@@ -233,15 +249,20 @@ the CMake, Ninja, ARM64 Linux, and MinGW cross-compilers listed in the
 dotnet restore --locked-mode
 ./build-native.sh
 dotnet build RapidYencSharp.sln --configuration Release --no-restore
+dotnet test RapidYencSharp.Tests/RapidYencSharp.Tests.csproj \
+  --configuration Release --no-build
 dotnet pack RapidYencSharp/RapidYencSharp.csproj \
   --configuration Release --no-build --output artifacts/packages
 ```
+
+Managed microbenchmarks are available in `RapidYencSharp.Benchmarks` and are
+intended for local before/after comparisons rather than as a noisy CI gate.
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-The underlying rapidyenc library is licensed under its own terms. See the [rapidyenc repository](https://github.com/animetosho/rapidyenc) for details.
+The underlying rapidyenc library is licensed under its own terms. See the [rapidyenc repository](https://github.com/nzbdav/rapidyenc) for details.
 
 ## Contributing
 
@@ -251,5 +272,5 @@ development and release workflow. Report vulnerabilities according to
 
 ## Acknowledgments
 
-- [rapidyenc](https://github.com/animetosho/rapidyenc) by Anime Tosho for the high-performance native library
+- The original [rapidyenc project](https://github.com/animetosho/rapidyenc) by Anime Tosho
 - All contributors to this project

@@ -9,8 +9,8 @@ import zipfile
 
 
 EXPECTED_PACKAGE_FILES = {
-    "lib/net9.0/RapidYencSharp.dll",
-    "lib/net9.0/RapidYencSharp.xml",
+    "lib/net10.0/RapidYencSharp.dll",
+    "lib/net10.0/RapidYencSharp.xml",
     "runtimes/linux-x64/native/librapidyenc.so",
     "runtimes/linux-arm64/native/librapidyenc.so",
     "runtimes/win-x64/native/rapidyenc.dll",
@@ -34,14 +34,22 @@ def validate(directory: Path) -> None:
     symbols = single_package(directory, "*.snupkg")
 
     with zipfile.ZipFile(package) as archive:
-        missing = EXPECTED_PACKAGE_FILES.difference(archive.namelist())
+        names = set(archive.namelist())
+        missing = EXPECTED_PACKAGE_FILES.difference(names)
         if missing:
             raise ValueError(f"{package} is missing: {sorted(missing)}")
+        stale = sorted(name for name in names if name.startswith("lib/net9.0/"))
+        if stale:
+            raise ValueError(f"{package} contains stale .NET 9 assets: {stale}")
 
     with zipfile.ZipFile(symbols) as archive:
-        expected_pdb = "lib/net9.0/RapidYencSharp.pdb"
-        if expected_pdb not in archive.namelist():
+        names = set(archive.namelist())
+        expected_pdb = "lib/net10.0/RapidYencSharp.pdb"
+        if expected_pdb not in names:
             raise ValueError(f"{symbols} is missing: {expected_pdb}")
+        stale = sorted(name for name in names if name.startswith("lib/net9.0/"))
+        if stale:
+            raise ValueError(f"{symbols} contains stale .NET 9 assets: {stale}")
 
     print(f"Validated {package} and {symbols}")
 

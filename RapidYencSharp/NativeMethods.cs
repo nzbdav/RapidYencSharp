@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace RapidYencSharp;
@@ -24,7 +25,7 @@ public enum RapidYencDecoderEnd
 /// <summary>
 /// P/Invoke declarations for the rapidyenc native library
 /// </summary>
-internal static class NativeMethods
+internal static partial class NativeMethods
 {
     private const string LibraryName = "rapidyenc";
 
@@ -35,6 +36,13 @@ internal static class NativeMethods
         {
             if (libraryName == LibraryName)
             {
+                string? explicitPath = Environment.GetEnvironmentVariable("RAPIDYENC_LIBRARY_PATH");
+                if (!string.IsNullOrWhiteSpace(explicitPath) &&
+                    NativeLibrary.TryLoad(explicitPath, out var explicitHandle))
+                {
+                    return explicitHandle;
+                }
+
                 // Try common library names
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
@@ -62,9 +70,16 @@ internal static class NativeMethods
         });
     }
 
+    // LibraryImport stubs are generated through a nested helper type. Calling
+    // this managed method first guarantees that this type's resolver has run.
+    internal static void EnsureResolverRegistered()
+    {
+    }
+
     // Version
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern int rapidyenc_version();
+    [LibraryImport(LibraryName, EntryPoint = "rapidyenc_version")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    internal static partial int rapidyenc_version();
 
     // Kernel constants
     public const int RYKERN_GENERIC = 0;
@@ -82,103 +97,124 @@ internal static class NativeMethods
     public const int RYKERN_ZBC = 16;
 
     // Encode functions
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern void rapidyenc_encode_init();
+    [LibraryImport(LibraryName, EntryPoint = "rapidyenc_encode_init")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    internal static partial void rapidyenc_encode_init();
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern nuint rapidyenc_encode(
-        [In] IntPtr src,
-        [Out] IntPtr dest,
+    [LibraryImport(LibraryName, EntryPoint = "rapidyenc_encode")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    internal static partial nuint rapidyenc_encode(
+        IntPtr src,
+        IntPtr dest,
         nuint src_length);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern nuint rapidyenc_encode_ex(
+    [LibraryImport(LibraryName, EntryPoint = "rapidyenc_encode_ex")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    internal static partial nuint rapidyenc_encode_ex(
         int line_size,
         ref int column,
-        [In] IntPtr src,
-        [Out] IntPtr dest,
+        IntPtr src,
+        IntPtr dest,
         nuint src_length,
         int is_end);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern nuint rapidyenc_encode_ex(
+    [LibraryImport(LibraryName, EntryPoint = "rapidyenc_encode_ex")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    internal static partial nuint rapidyenc_encode_ex_without_column(
         int line_size,
         IntPtr column,
-        [In] IntPtr src,
-        [Out] IntPtr dest,
+        IntPtr src,
+        IntPtr dest,
         nuint src_length,
         int is_end);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern int rapidyenc_encode_kernel();
+    [LibraryImport(LibraryName, EntryPoint = "rapidyenc_encode_kernel")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    internal static partial int rapidyenc_encode_kernel();
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern nuint rapidyenc_encode_max_length(nuint length, int line_size);
+    [LibraryImport(LibraryName, EntryPoint = "rapidyenc_encode_max_length")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    internal static partial nuint rapidyenc_encode_max_length(nuint length, int line_size);
 
     // Decode functions
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern void rapidyenc_decode_init();
+    [LibraryImport(LibraryName, EntryPoint = "rapidyenc_decode_init")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    internal static partial void rapidyenc_decode_init();
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern nuint rapidyenc_decode(
-        [In] IntPtr src,
-        [Out] IntPtr dest,
+    [LibraryImport(LibraryName, EntryPoint = "rapidyenc_decode")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    internal static partial nuint rapidyenc_decode(
+        IntPtr src,
+        IntPtr dest,
         nuint src_length);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern nuint rapidyenc_decode_ex(
+    [LibraryImport(LibraryName, EntryPoint = "rapidyenc_decode_ex")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    internal static partial nuint rapidyenc_decode_ex(
         int is_raw,
-        [In] IntPtr src,
-        [Out] IntPtr dest,
+        IntPtr src,
+        IntPtr dest,
         nuint src_length,
         ref RapidYencDecoderState state);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern nuint rapidyenc_decode_ex(
+    [LibraryImport(LibraryName, EntryPoint = "rapidyenc_decode_ex")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    internal static partial nuint rapidyenc_decode_ex_without_state(
         int is_raw,
-        [In] IntPtr src,
-        [Out] IntPtr dest,
+        IntPtr src,
+        IntPtr dest,
         nuint src_length,
         IntPtr state);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern RapidYencDecoderEnd rapidyenc_decode_incremental(
+    [LibraryImport(LibraryName, EntryPoint = "rapidyenc_decode_incremental")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    internal static partial RapidYencDecoderEnd rapidyenc_decode_incremental(
         ref IntPtr src,
         ref IntPtr dest,
         nuint src_length,
         ref RapidYencDecoderState state);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern int rapidyenc_decode_kernel();
+    [LibraryImport(LibraryName, EntryPoint = "rapidyenc_decode_kernel")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    internal static partial int rapidyenc_decode_kernel();
 
     // CRC32 functions
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern void rapidyenc_crc_init();
+    [LibraryImport(LibraryName, EntryPoint = "rapidyenc_crc_init")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    internal static partial void rapidyenc_crc_init();
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern uint rapidyenc_crc(
-        [In] IntPtr src,
+    [LibraryImport(LibraryName, EntryPoint = "rapidyenc_crc")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    internal static partial uint rapidyenc_crc(
+        IntPtr src,
         nuint src_length,
         uint init_crc);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern uint rapidyenc_crc_combine(uint crc1, uint crc2, ulong length2);
+    [LibraryImport(LibraryName, EntryPoint = "rapidyenc_crc_combine")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    internal static partial uint rapidyenc_crc_combine(uint crc1, uint crc2, ulong length2);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern uint rapidyenc_crc_zeros(uint init_crc, ulong length);
+    [LibraryImport(LibraryName, EntryPoint = "rapidyenc_crc_zeros")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    internal static partial uint rapidyenc_crc_zeros(uint init_crc, ulong length);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern uint rapidyenc_crc_unzero(uint init_crc, ulong length);
+    [LibraryImport(LibraryName, EntryPoint = "rapidyenc_crc_unzero")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    internal static partial uint rapidyenc_crc_unzero(uint init_crc, ulong length);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern uint rapidyenc_crc_multiply(uint a, uint b);
+    [LibraryImport(LibraryName, EntryPoint = "rapidyenc_crc_multiply")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    internal static partial uint rapidyenc_crc_multiply(uint a, uint b);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern uint rapidyenc_crc_2pow(long n);
+    [LibraryImport(LibraryName, EntryPoint = "rapidyenc_crc_2pow")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    internal static partial uint rapidyenc_crc_2pow(long n);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern uint rapidyenc_crc_256pow(ulong n);
+    [LibraryImport(LibraryName, EntryPoint = "rapidyenc_crc_256pow")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    internal static partial uint rapidyenc_crc_256pow(ulong n);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern int rapidyenc_crc_kernel();
+    [LibraryImport(LibraryName, EntryPoint = "rapidyenc_crc_kernel")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    internal static partial int rapidyenc_crc_kernel();
 }
