@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.2](https://github.com/nzbdav/RapidYencSharp/compare/v2.0.1...v2.0.2) (2026-07-11)
+
+
+### Bug Fixes
+
+* **deps:** update package rename lock files ([1af3b5c](https://github.com/nzbdav/RapidYencSharp/commit/1af3b5c50609c83a3a9c54ce909c477df48345aa))
+
 ## [2.0.1](https://github.com/nzbdav/RapidYencSharp/compare/v2.0.0...v2.0.1) (2026-07-11)
 
 
