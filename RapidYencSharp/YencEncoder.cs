@@ -10,6 +10,7 @@ public static class YencEncoder
 {
     private static readonly Lazy<bool> Init = new(() =>
     {
+        NativeMethods.EnsureResolverRegistered();
         NativeMethods.rapidyenc_encode_init();
         return true;
     });
@@ -25,7 +26,14 @@ public static class YencEncoder
     /// <summary>
     /// Gets the kernel/ISA level used for encoding
     /// </summary>
-    public static int Kernel => NativeMethods.rapidyenc_encode_kernel();
+    public static int Kernel
+    {
+        get
+        {
+            EnsureInitialized();
+            return NativeMethods.rapidyenc_encode_kernel();
+        }
+    }
 
     /// <summary>
     /// Calculates the maximum possible length of yEnc encoded output for a given input length
@@ -35,6 +43,8 @@ public static class YencEncoder
     /// <returns>The maximum possible encoded length</returns>
     public static nuint GetMaxEncodedLength(nuint inputLength, int lineSize = 128)
     {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(lineSize);
+        NativeMethods.EnsureResolverRegistered();
         return NativeMethods.rapidyenc_encode_max_length(inputLength, lineSize);
     }
 
@@ -49,6 +59,7 @@ public static class YencEncoder
     public static int Encode(ReadOnlySpan<byte> input, Span<byte> output, int lineSize = 128)
     {
         EnsureInitialized();
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(lineSize);
 
         if (input.IsEmpty)
             return 0;
@@ -57,16 +68,26 @@ public static class YencEncoder
         if ((nuint)output.Length < maxLength)
             throw new ArgumentException($"Output buffer too small. Required: {maxLength}, Provided: {output.Length}",
                 nameof(output));
+        if (input.Overlaps(output))
+            throw new ArgumentException("Input and output buffers must not overlap when encoding.", nameof(output));
 
         unsafe
         {
             fixed (byte* inputPtr = input)
             fixed (byte* outputPtr = output)
             {
-                nuint encodedLength = NativeMethods.rapidyenc_encode(
-                    new IntPtr(inputPtr),
-                    new IntPtr(outputPtr),
-                    (nuint)input.Length);
+                nuint encodedLength = lineSize == 128
+                    ? NativeMethods.rapidyenc_encode(
+                        new IntPtr(inputPtr),
+                        new IntPtr(outputPtr),
+                        (nuint)input.Length)
+                    : NativeMethods.rapidyenc_encode_ex_without_column(
+                        lineSize,
+                        IntPtr.Zero,
+                        new IntPtr(inputPtr),
+                        new IntPtr(outputPtr),
+                        (nuint)input.Length,
+                        1);
 
                 if (encodedLength > maxLength)
                     throw new InvalidOperationException("Encoded length exceeds maximum expected length");
@@ -91,7 +112,7 @@ public static class YencEncoder
         nuint maxLength = GetMaxEncodedLength((nuint)input.Length);
 
         // Use ArrayPool for temporary buffer to reduce allocations
-        byte[] pooledBuffer = ArrayPool<byte>.Shared.Rent((int)maxLength);
+        byte[] pooledBuffer = ArrayPool<byte>.Shared.Rent(checked((int)maxLength));
         try
         {
             int bytesWritten = Encode(input, pooledBuffer);
@@ -121,6 +142,7 @@ public static class YencEncoder
         bool isEnd = true)
     {
         EnsureInitialized();
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(lineSize);
 
         if (input.IsEmpty)
             return 0;
@@ -129,6 +151,8 @@ public static class YencEncoder
         if ((nuint)output.Length < maxLength)
             throw new ArgumentException($"Output buffer too small. Required: {maxLength}, Provided: {output.Length}",
                 nameof(output));
+        if (input.Overlaps(output))
+            throw new ArgumentException("Input and output buffers must not overlap when encoding.", nameof(output));
 
         unsafe
         {
@@ -151,7 +175,7 @@ public static class YencEncoder
                 }
                 else
                 {
-                    encodedLength = NativeMethods.rapidyenc_encode_ex(
+                    encodedLength = NativeMethods.rapidyenc_encode_ex_without_column(
                         lineSize,
                         IntPtr.Zero,
                         new IntPtr(inputPtr),
@@ -186,7 +210,7 @@ public static class YencEncoder
         nuint maxLength = GetMaxEncodedLength((nuint)input.Length, lineSize);
 
         // Use ArrayPool for temporary buffer to reduce allocations
-        byte[] pooledBuffer = ArrayPool<byte>.Shared.Rent((int)maxLength);
+        byte[] pooledBuffer = ArrayPool<byte>.Shared.Rent(checked((int)maxLength));
         try
         {
             int bytesWritten = EncodeEx(input, pooledBuffer, ref column, lineSize, isEnd);

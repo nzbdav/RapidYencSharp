@@ -2,9 +2,9 @@
 
 ## Purpose and stack
 
-- RapidYencSharp is a .NET 9 binding for the vendored rapidyenc native library.
-- `RapidYencSharp/` contains the managed package; `rapidyenc/` contains the
-  native source used to produce runtime-specific binaries.
+- RapidYencSharp is a .NET 10 binding for the rapidyenc native library.
+- `RapidYencSharp/` contains the managed package; `rapidyenc/` is a submodule
+  of `nzbdav/rapidyenc` used to produce runtime-specific binaries.
 - Release Please versions the package; GitHub Actions builds and publishes
   releases.
 
@@ -35,13 +35,15 @@
 dotnet restore --locked-mode
 dotnet format RapidYencSharp.sln --verify-no-changes --no-restore
 dotnet build RapidYencSharp.sln --configuration Release --no-restore
+dotnet test RapidYencSharp.Tests/RapidYencSharp.Tests.csproj --configuration Release --no-build
 ./build-artifacts.sh
 python3 scripts/validate-package.py artifacts/packages
 ```
 
 - The container build is the authoritative multi-RID package build.
 - Add regression tests for encoding, decoding, CRC, interop, bounds, and
-  incremental-state changes when a test project is available.
+ incremental-state changes. Use `RapidYencSharp.Benchmarks` for measured
+ hot-path changes; do not make timed benchmarks a CI gate.
 - Keep nullable analysis enabled and resolve warnings rather than suppressing
   them without justification.
 

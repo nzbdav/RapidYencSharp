@@ -11,6 +11,7 @@ public static class Version
     /// <returns>The version in 0xMMmmpp format, where MM=major version, mm=minor version, pp=patch version</returns>
     public static int GetVersion()
     {
+        NativeMethods.EnsureResolverRegistered();
         return NativeMethods.rapidyenc_version();
     }
 

@@ -25,7 +25,7 @@ body:
     id: runtime
     attributes:
       label: .NET, operating system, and architecture
-      placeholder: .NET 9.0 on Ubuntu 24.04 x64
+      placeholder: .NET 10.0 on Ubuntu 24.04 x64
     validations:
       required: true
   - type: textarea

@@ -9,12 +9,20 @@ when changing encoding, decoding, CRC, interop, or native build behavior.
 - Git
 - Docker or Podman for reproducible multi-RID package builds
 
+Clone with `--recurse-submodules`, or initialize rapidyenc in an existing
+clone:
+
+```bash
+git submodule update --init
+```
+
 Restore, format, and build the managed project:
 
 ```bash
 dotnet restore --locked-mode
 dotnet format RapidYencSharp.sln --verify-no-changes --no-restore
 dotnet build RapidYencSharp.sln --configuration Release --no-restore
+dotnet test RapidYencSharp.Tests/RapidYencSharp.Tests.csproj --configuration Release --no-build
 ```
 
 Build and validate all release artifacts with Podman:
@@ -39,6 +47,10 @@ private data.
 3. Update documentation when behavior or public APIs change.
 4. Add or update tests when practical.
 5. Complete the pull request template and ensure all required checks pass.
+
+Use `RapidYencSharp.Benchmarks` to measure hot-path changes locally. Commit the
+benchmark code, but do not treat timing results from shared CI runners as a
+pass/fail gate.
 
 Use scoped Conventional Commit subjects, such as `fix(interop):`,
 `feat(yenc):`, `docs(readme):`, or `chore(ci):`. Release Please uses commit

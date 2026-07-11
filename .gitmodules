@@ -1,0 +1,4 @@
+[submodule "rapidyenc"]
+	path = rapidyenc
+	url = https://github.com/nzbdav/rapidyenc.git
+	ignore = dirty

@@ -9,6 +9,8 @@ riderModule.iml
 /_ReSharper.Caches/
 *.DotSettings.user
 artifacts
+BenchmarkDotNet.Artifacts/
+TestResults/
 RapidYencSharp/runtimes/
 rapidyenc/build/
 __pycache__/
