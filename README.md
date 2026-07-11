@@ -1,6 +1,12 @@
 # RapidYencSharp
 
+[![CI](https://github.com/nzbdav/RapidYencSharp/actions/workflows/ci.yml/badge.svg)](https://github.com/nzbdav/RapidYencSharp/actions/workflows/ci.yml)
+[![NuGet](https://img.shields.io/nuget/v/RapidYencSharp.svg)](https://www.nuget.org/packages/RapidYencSharp)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 .NET bindings for [rapidyenc](https://github.com/animetosho/rapidyenc) - a high-performance yEnc encoding/decoding library.
+
+Maintained by the [nzbdav organization](https://github.com/nzbdav).
 
 ## Features
 
@@ -22,6 +28,14 @@ dotnet add package RapidYencSharp
 
 - .NET 9.0 or later
 - Native rapidyenc library (included in the package for supported platforms)
+
+## Supported Platforms
+
+| Runtime identifier | Architecture | Native library |
+| --- | --- | --- |
+| `linux-x64` | Linux x64 | `librapidyenc.so` |
+| `linux-arm64` | Linux ARM64 | `librapidyenc.so` |
+| `win-x64` | Windows x64 | `rapidyenc.dll` |
 
 ## Quick Start
 
@@ -153,6 +167,10 @@ uint combined = Crc32.Combine(crc1, crc2, (ulong)part2.Length);
 
 ### Version
 
+`Version` reports the version of the bundled native rapidyenc library. It is
+independent from the RapidYencSharp NuGet package version shown by NuGet and
+managed by Release Please.
+
 #### Properties
 
 - `int Major` - Major version number
@@ -192,13 +210,32 @@ The `Examples.cs` file contains comprehensive examples including:
 
 ## Native Library
 
-The package includes precompiled native libraries for:
+The package includes the native libraries listed under
+[Supported Platforms](#supported-platforms). For other platforms, build
+rapidyenc from source and place the resulting shared library in the application
+directory.
 
-- Windows x64 (`rapidyenc.dll`)
-- Linux x64 (`librapidyenc.so`)
-- Linux ARM64 (`librapidyenc.so`)
+## Building from Source
 
-For other platforms, you'll need to build the rapidyenc library from source and place it in the application directory.
+The reproducible build uses the repository `Dockerfile` to compile every
+supported native runtime and pack the NuGet package. With Podman installed:
+
+```bash
+./build-artifacts.sh
+python3 scripts/validate-package.py artifacts/packages
+```
+
+Artifacts are written under `artifacts/`. To build directly on Linux, install
+the CMake, Ninja, ARM64 Linux, and MinGW cross-compilers listed in the
+`Dockerfile`, then run:
+
+```bash
+dotnet restore --locked-mode
+./build-native.sh
+dotnet build RapidYencSharp.sln --configuration Release --no-restore
+dotnet pack RapidYencSharp/RapidYencSharp.csproj \
+  --configuration Release --no-build --output artifacts/packages
+```
 
 ## License
 
@@ -208,7 +245,9 @@ The underlying rapidyenc library is licensed under its own terms. See the [rapid
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit issues or pull requests.
+Contributions are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) for the
+development and release workflow. Report vulnerabilities according to
+[SECURITY.md](SECURITY.md), not through public issues.
 
 ## Acknowledgments
 

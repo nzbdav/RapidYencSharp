@@ -21,9 +21,11 @@ RUN apt-get update \
 WORKDIR /src
 
 COPY RapidYencSharp.sln ./
+COPY Directory.Build.props global.json ./
 COPY RapidYencSharp/RapidYencSharp.csproj RapidYencSharp/
+COPY RapidYencSharp/packages.lock.json RapidYencSharp/
 
-RUN dotnet restore RapidYencSharp/RapidYencSharp.csproj
+RUN dotnet restore RapidYencSharp/RapidYencSharp.csproj --locked-mode
 
 COPY . .
 

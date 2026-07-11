@@ -9,6 +9,10 @@ riderModule.iml
 /_ReSharper.Caches/
 *.DotSettings.user
 artifacts
+RapidYencSharp/runtimes/
+rapidyenc/build/
+__pycache__/
+*.pyc
 
 ##############
 # IDE config #
