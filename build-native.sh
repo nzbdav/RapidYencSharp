@@ -8,6 +8,12 @@ RAPIDYENC_DIR="$SCRIPT_DIR/rapidyenc"
 BUILD_ROOT="$RAPIDYENC_DIR/build"
 OUTPUT_DIR="$SCRIPT_DIR/RapidYencSharp/runtimes"
 
+if [[ ! -f "$RAPIDYENC_DIR/CMakeLists.txt" ]]; then
+    echo "Error: rapidyenc submodule is not initialized." >&2
+    echo "Run: git submodule update --init" >&2
+    exit 1
+fi
+
 IFS=' ' read -r -a TARGET_RIDS <<< "${TARGET_RIDS:-linux-x64 linux-arm64 win-x64}"
 
 if [[ ${#TARGET_RIDS[@]} -eq 0 ]]; then
