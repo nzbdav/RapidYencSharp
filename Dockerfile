@@ -33,7 +33,8 @@ RUN dotnet restore RapidYencSharp.sln --locked-mode
 
 COPY . .
 
-RUN chmod +x build-native.sh \
+RUN dotnet restore RapidYencSharp.sln --locked-mode \
+    && chmod +x build-native.sh \
     && ./build-native.sh
 
 RUN dotnet build RapidYencSharp.sln -c Release --no-restore
