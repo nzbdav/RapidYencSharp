@@ -1,6 +1,6 @@
 ARG DOTNET_SDK_VERSION=10.0
 
-FROM mcr.microsoft.com/dotnet/sdk:${DOTNET_SDK_VERSION}-bookworm-slim AS build
+FROM mcr.microsoft.com/dotnet/sdk:${DOTNET_SDK_VERSION}-noble AS build
 
 ENV DEBIAN_FRONTEND=noninteractive
 
