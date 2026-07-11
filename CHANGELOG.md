@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.1](https://github.com/nzbdav/RapidYencSharp/compare/v2.0.0...v2.0.1) (2026-07-11)
+
+
+### Bug Fixes
+
+* **package:** publish under NzbDav.RapidYencSharp ([18976a1](https://github.com/nzbdav/RapidYencSharp/commit/18976a13370e06071de9ef6afedce50efbed4aa1))
+
 ## [2.0.0](https://github.com/nzbdav/RapidYencSharp/compare/v1.0.0...v2.0.0) (2026-07-11)
 
 
