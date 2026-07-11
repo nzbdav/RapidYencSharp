@@ -8,7 +8,7 @@
 
         <!-- Package information -->
         <PackageId>NzbDav.RapidYencSharp</PackageId>
-        <Version>2.0.0</Version>
+        <Version>2.0.1</Version>
         <Authors>RapidYencSharp Contributors</Authors>
         <Title>NzbDav.RapidYencSharp</Title>
         <Description>NzbDav .NET bindings for rapidyenc, a high-performance yEnc encoding and decoding library.</Description>
