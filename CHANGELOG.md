@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.0.3](https://github.com/nzbdav/RapidYencSharp/compare/v2.0.2...v2.0.3) (2026-07-11)
+
+
+### Bug Fixes
+
+* **deps:** bump NuGet/login from ebc737b6fc418a6ca0073cf116ec8dc156d8b81e to 8d196754b4036150537f80ac539e15c2f1028841 in the github-actions group ([b450fa6](https://github.com/nzbdav/RapidYencSharp/commit/b450fa6e7cb849a54aec1b506d64b000d27f5085))
+* **deps:** bump NuGet/login in the github-actions group ([73eb583](https://github.com/nzbdav/RapidYencSharp/commit/73eb583cbaf7540a3fac996a705af359229ab093))
+
 ## [2.0.2](https://github.com/nzbdav/RapidYencSharp/compare/v2.0.1...v2.0.2) (2026-07-11)
 
 
