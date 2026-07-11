@@ -139,7 +139,7 @@ fi
 
 echo ""
 log_info "To use the NuGet package locally:"
-echo "  dotnet add package RapidYencSharp --source $ARTIFACTS_DIR/packages"
+echo "  dotnet add package NzbDav.RapidYencSharp --source $ARTIFACTS_DIR/packages"
 echo ""
 log_info "Or copy the native libraries to your runtime directories:"
 echo "  cp -r $ARTIFACTS_DIR/runtimes/* <your-project>/runtimes/"

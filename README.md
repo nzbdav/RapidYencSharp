@@ -1,7 +1,7 @@
 # RapidYencSharp
 
 [![CI](https://github.com/nzbdav/RapidYencSharp/actions/workflows/ci.yml/badge.svg)](https://github.com/nzbdav/RapidYencSharp/actions/workflows/ci.yml)
-[![NuGet](https://img.shields.io/nuget/v/RapidYencSharp.svg)](https://www.nuget.org/packages/RapidYencSharp)
+[![NuGet](https://img.shields.io/nuget/v/NzbDav.RapidYencSharp.svg)](https://www.nuget.org/packages/NzbDav.RapidYencSharp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 .NET bindings for [rapidyenc](https://github.com/nzbdav/rapidyenc) - a high-performance yEnc encoding/decoding library.
@@ -21,7 +21,7 @@ Maintained by the [nzbdav organization](https://github.com/nzbdav).
 ## Installation
 
 ```bash
-dotnet add package RapidYencSharp
+dotnet add package NzbDav.RapidYencSharp
 ```
 
 ## Requirements

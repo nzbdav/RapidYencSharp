@@ -51,7 +51,7 @@ python3 scripts/validate-package.py artifacts/packages
 
 - Avoid silent public API or native ABI breaks. Isolate compatibility changes,
   document them, and use semantic versioning.
-- The NuGet package ID is `RapidYencSharp`.
+- The NuGet package ID is `NzbDav.RapidYencSharp`.
 - Supported packaged runtimes are `linux-x64`, `linux-arm64`, and `win-x64`.
 
 ## Repository and release
