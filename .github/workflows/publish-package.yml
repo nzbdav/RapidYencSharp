@@ -54,8 +54,14 @@ jobs:
           version="$(dotnet msbuild RapidYencSharp/RapidYencSharp.csproj -getProperty:Version)"
           test "${RELEASE_TAG}" = "v${version}"
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392 # v3.6.0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
+
       - name: Build release artifacts
-        run: docker build --target export --output type=local,dest=. .
+        run: docker buildx build --target export --output type=local,dest=. .
 
       - name: Validate package contents
         run: python3 scripts/validate-package.py artifacts/packages

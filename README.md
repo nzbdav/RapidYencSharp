@@ -16,7 +16,7 @@ Maintained by the [nzbdav organization](https://github.com/nzbdav).
 - Incremental encoding/decoding with state tracking
 - NNTP dot unstuffing support
 - Automatic SIMD optimization (SSE2, SSSE3, AVX, AVX2, VBMI2, NEON, RVV)
-- Cross-platform support (Windows x64, Linux x64/ARM64)
+- Cross-platform support (Windows x64, Linux glibc/musl x64/ARM64)
 
 ## Installation
 
@@ -33,8 +33,10 @@ dotnet add package NzbDav.RapidYencSharp
 
 | Runtime identifier | Architecture | Native library |
 | --- | --- | --- |
-| `linux-x64` | Linux x64 | `librapidyenc.so` |
-| `linux-arm64` | Linux ARM64 | `librapidyenc.so` |
+| `linux-x64` | Linux x64 (glibc) | `librapidyenc.so` |
+| `linux-arm64` | Linux ARM64 (glibc) | `librapidyenc.so` |
+| `linux-musl-x64` | Linux x64 (musl / Alpine) | `librapidyenc.so` |
+| `linux-musl-arm64` | Linux ARM64 (musl / Alpine) | `librapidyenc.so` |
 | `win-x64` | Windows x64 | `rapidyenc.dll` |
 
 ## Quick Start
