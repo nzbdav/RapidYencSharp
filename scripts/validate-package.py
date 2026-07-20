@@ -13,6 +13,8 @@ EXPECTED_PACKAGE_FILES = {
     "lib/net10.0/RapidYencSharp.xml",
     "runtimes/linux-x64/native/librapidyenc.so",
     "runtimes/linux-arm64/native/librapidyenc.so",
+    "runtimes/linux-musl-x64/native/librapidyenc.so",
+    "runtimes/linux-musl-arm64/native/librapidyenc.so",
     "runtimes/win-x64/native/rapidyenc.dll",
     "README.md",
     "LICENSE",

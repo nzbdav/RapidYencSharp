@@ -33,8 +33,10 @@ python3 scripts/validate-package.py artifacts/packages
 ```
 
 The container build compiles native libraries for `linux-x64`, `linux-arm64`,
-and `win-x64`. To build native libraries directly, install CMake, Ninja, and
-the cross-compilers listed in the `Dockerfile`, then run `./build-native.sh`.
+`linux-musl-x64`, `linux-musl-arm64`, and `win-x64`. To build glibc/Windows
+natives directly, install CMake, Ninja, and the cross-compilers listed in the
+`Dockerfile`, then run `./build-native.sh`. Musl natives are produced by the
+Alpine stages in the `Dockerfile`.
 
 Never commit credentials, access tokens, native build output, or captured
 private data.

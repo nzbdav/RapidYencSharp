@@ -1,4 +1,31 @@
 ARG DOTNET_SDK_VERSION=10.0
+ARG ALPINE_VERSION=3.21
+
+# -------- musl natives (Alpine) --------
+# Built as separate stages so linux-musl-* RID consumers (e.g. Alpine .NET
+# images) do not fall back to the glibc linux-x64 binary via the RID graph.
+
+FROM --platform=linux/amd64 alpine:${ALPINE_VERSION} AS rapidyenc-musl-x64
+RUN apk add --no-cache build-base cmake ninja
+WORKDIR /src
+COPY rapidyenc/ ./
+RUN cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+    && cmake --build build --config Release --target rapidyenc_shared \
+    && mkdir -p /out \
+    && lib_path="$(find build -name 'librapidyenc.so' -type f | head -n 1)" \
+    && test -n "$lib_path" \
+    && cp "$lib_path" /out/librapidyenc.so
+
+FROM --platform=linux/arm64 alpine:${ALPINE_VERSION} AS rapidyenc-musl-arm64
+RUN apk add --no-cache build-base cmake ninja
+WORKDIR /src
+COPY rapidyenc/ ./
+RUN cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+    && cmake --build build --config Release --target rapidyenc_shared \
+    && mkdir -p /out \
+    && lib_path="$(find build -name 'librapidyenc.so' -type f | head -n 1)" \
+    && test -n "$lib_path" \
+    && cp "$lib_path" /out/librapidyenc.so
 
 FROM mcr.microsoft.com/dotnet/sdk:${DOTNET_SDK_VERSION}-noble AS build
 
@@ -36,6 +63,13 @@ COPY . .
 RUN dotnet restore RapidYencSharp.sln --locked-mode \
     && chmod +x build-native.sh \
     && ./build-native.sh
+
+# Overlay musl-built natives after the glibc/win cross-compile pass.
+RUN mkdir -p \
+        RapidYencSharp/runtimes/linux-musl-x64/native \
+        RapidYencSharp/runtimes/linux-musl-arm64/native
+COPY --from=rapidyenc-musl-x64 /out/librapidyenc.so RapidYencSharp/runtimes/linux-musl-x64/native/librapidyenc.so
+COPY --from=rapidyenc-musl-arm64 /out/librapidyenc.so RapidYencSharp/runtimes/linux-musl-arm64/native/librapidyenc.so
 
 RUN dotnet build RapidYencSharp.sln -c Release --no-restore
 

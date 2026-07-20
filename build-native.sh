@@ -14,6 +14,8 @@ if [[ ! -f "$RAPIDYENC_DIR/CMakeLists.txt" ]]; then
     exit 1
 fi
 
+# glibc + Windows RIDs are built here. linux-musl-* natives are produced by the
+# Alpine stages in the Dockerfile (authoritative multi-RID package build).
 IFS=' ' read -r -a TARGET_RIDS <<< "${TARGET_RIDS:-linux-x64 linux-arm64 win-x64}"
 
 if [[ ${#TARGET_RIDS[@]} -eq 0 ]]; then
@@ -65,6 +67,40 @@ build_target() {
                 -DCMAKE_RC_COMPILER=x86_64-w64-mingw32-windres
                 "-DCMAKE_SHARED_LINKER_FLAGS=-static-libstdc++ -static-libgcc"
             )
+            ;;
+        linux-musl-x64|linux-musl-arm64)
+            # Prefer building musl natives via the Dockerfile Alpine stages.
+            # This path supports local TARGET_RIDS overrides on a musl host (or
+            # with a musl cross toolchain on PATH).
+            lib_names=("librapidyenc.so")
+            case "$rid" in
+                linux-musl-x64)
+                    if command -v x86_64-linux-musl-g++ >/dev/null 2>&1; then
+                        cmake_args+=(
+                            -DCMAKE_SYSTEM_NAME=Linux
+                            -DCMAKE_SYSTEM_PROCESSOR=x86_64
+                            -DCMAKE_C_COMPILER=x86_64-linux-musl-gcc
+                            -DCMAKE_CXX_COMPILER=x86_64-linux-musl-g++
+                        )
+                    elif ! command -v g++ >/dev/null 2>&1; then
+                        echo "Error: g++ (musl) or x86_64-linux-musl-g++ is required for linux-musl-x64." >&2
+                        return 1
+                    fi
+                    ;;
+                linux-musl-arm64)
+                    if command -v aarch64-linux-musl-g++ >/dev/null 2>&1; then
+                        cmake_args+=(
+                            -DCMAKE_SYSTEM_NAME=Linux
+                            -DCMAKE_SYSTEM_PROCESSOR=aarch64
+                            -DCMAKE_C_COMPILER=aarch64-linux-musl-gcc
+                            -DCMAKE_CXX_COMPILER=aarch64-linux-musl-g++
+                        )
+                    else
+                        echo "Error: aarch64-linux-musl-g++ is required for linux-musl-arm64 (or use the Dockerfile)." >&2
+                        return 1
+                    fi
+                    ;;
+            esac
             ;;
         *)
             echo "Unsupported runtime identifier: $rid" >&2
